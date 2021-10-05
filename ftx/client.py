@@ -1,0 +1,177 @@
+import time
+import aiohttp
+import asyncio
+import requests
+from ftx import signature
+from urllib.parse import urlencode
+from typing import Dict, Optional, List, Tuple
+from ftx import FtxAPIException, FtxValueError
+from concurrent.futures._base import TimeoutError
+
+
+class BaseClient:
+    API_URL = "https://ftx.com/api"
+
+    def __init__(
+        self, api: Optional[str] = None, secret: Optional[str] = None
+    ):
+        self.API_KEY, self.API_SECRET = api, secret
+        self.session = self._init_session()
+        self.header = {}
+        self.TIMEOUT = 45
+
+    def _get_header(self) -> Dict:
+        header = {
+            "FTX-KEY": "",
+            "FTX-SIGN": "",
+            "FTX-TS": "",
+        }
+        if self.API_KEY:
+            assert self.API_KEY
+            header["FTX-KEY"] = self.API_KEY
+        return header
+
+    def _init_session(self):
+        raise NotImplementedError
+
+    def _init_url(self):
+        self.api_url = self.API_URL
+
+    def _handle_response(self, response: requests.Response):
+        code = response.status_code
+        if code == 200:
+            return response.json()
+        else:
+            try:
+                resp_json = response.json()
+                raise FtxAPIException(resp_json, code)
+            except ValueError:
+                raise FtxValueError(response)
+
+
+class Client(BaseClient):
+    def __init__(self, api: Optional[str], secret: Optional[str]):
+        super().__init__(api=api, secret=secret)
+
+    def _init_session(self) -> requests.Session:
+        self.header = self._get_header()
+        session = requests.session()
+        session.headers.update(self.header)
+        return session
+
+    def _get(self, path: str, params=None):
+        return self._request("get", path, params)
+
+    def _post(self, path: str, params=None) -> Dict:
+        return self._request("post", path, params)
+
+    def _put(self, path: str, params=None) -> Dict:
+        return self._request("put", path, params)
+
+    def _delete(self, path: str, params=None) -> Dict:
+        return self._request("delete", path, params)
+
+    def _request(self, method, path: str, params: Dict):
+        try:
+            ts = str(int(time.time() * 1000))
+            uri = f"{self.API_URL}{path}"
+
+            sig = signature(ts, method, path, self.API_SECRET)
+            self.header["FTX-KEY"] = self.API_KEY
+            self.header["FTX-SIGN"] = sig
+            self.header["FTX-TS"] = ts
+            self.session.headers.update(self.header)
+
+            self.response = getattr(self.session, method)(uri, params=params)
+            return self._handle_response(self.response)
+        except Exception as e:
+            print(f"[ERROR] Request failed!")
+            print(e)
+
+    def get_markets(self) -> Dict:
+        return self._get("/markets")
+
+    def get_account_info(self) -> Dict:
+        return self._get("/account")
+
+
+class AsyncClient(BaseClient):
+    def __init__(
+        self,
+        api: Optional[str],
+        secret: Optional[str],
+        loop=None,
+    ):
+        self.loop = loop or asyncio.get_event_loop()
+        super().__init__(
+            api=api,
+            secret=secret,
+        )
+
+    @classmethod
+    async def create(
+        cls,
+        api: Optional[str],
+        secret: Optional[str],
+        loop=None,
+    ):
+        self = cls(api, secret, loop)
+        return self
+
+    def _init_session(self) -> aiohttp.ClientSession:
+        session = aiohttp.ClientSession(
+            loop=self.loop, headers=self._get_header()
+        )
+        return session
+
+    async def close_connection(self):
+        if self.session:
+            assert self.session
+            await self.session.close()
+
+    async def _request(self, method, uri: str, path: str, params: Dict):
+        try:
+            ts = str(int(time.time() * 1000))
+            uri = f"{self.API_URL}{path}"
+
+            sig = signature(ts, method, path, self.API_SECRET)
+            self.header["FTX-KEY"] = self.API_KEY
+            self.header["FTX-SIGN"] = sig
+            self.header["FTX-TS"] = ts
+            self.session.headers.update(self.header)
+
+            async with getattr(self.session, method)(
+                uri, params=params
+            ) as response:
+                self.response = response
+                return await self._handle_response(response)
+
+        except Exception as e:
+            print(f"[ERROR] Request failed!")
+            print(e)
+
+    async def _handle_response(self, response: requests.Response):
+        code = response.status_code
+        if code == 200:
+            return response.json()
+        else:
+            try:
+                resp_json = response.json()
+                raise FtxAPIException(resp_json, code)
+            except ValueError:
+                raise FtxValueError(response)
+
+    async def _get(self, path: str, params=None):
+        return await self._request("get", path, params)
+
+    async def _post(self, path: str, params=None) -> Dict:
+        return await self._request("post", path, params)
+
+    async def _put(self, path: str, params=None) -> Dict:
+        return await self._request("put", path, params)
+
+    async def _delete(self, path: str, params=None) -> Dict:
+        return await self._request("delete", path, params)
+
+    async def get_available_symbol(self):
+        return await self._get("public/info")
