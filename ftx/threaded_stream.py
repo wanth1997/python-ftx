@@ -5,7 +5,6 @@ from typing import Callable, Optional, Dict
 from ftx import AsyncClient
 
 
-
 class ThreadedApiManager(threading.Thread):
     def __init__(
         self,
@@ -27,18 +26,14 @@ class ThreadedApiManager(threading.Thread):
         ...
 
     async def socket_listener(self):
-        self._client = await AsyncClient.create(
-            loop=self._loop, **self._client_params
-        )
+        self._client = await AsyncClient.create(loop=self._loop, **self._client_params)
         await self._before_socket_listener_start()
         while self._running:
             await asyncio.sleep(0.2)
         while self._socket_running:
             await asyncio.sleep(0.2)
 
-    async def start_listener(
-        self, socket, name: str, callback, ping: Optional[Callable] = None
-    ):
+    async def start_listener(self, socket, name: str, callback, ping: Optional[Callable] = None):
         async with socket as s:
             while self._socket_running[name]:
                 try:
@@ -49,6 +44,7 @@ class ThreadedApiManager(threading.Thread):
                 if not msg:
                     continue
                 if "type" in msg and msg["type"] == "pong":
+                    #print("ping")
                     ping(name)
                     continue
                 callback(msg)

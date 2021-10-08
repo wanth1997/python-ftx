@@ -123,9 +123,7 @@ class ReconnectingWebsocket:
                 else:
                     break
             try:
-                res = await asyncio.wait_for(
-                    self.ws.recv(), timeout=self.TIMEOUT
-                )
+                res = await asyncio.wait_for(self.ws.recv(), timeout=self.TIMEOUT)
             except asyncio.TimeoutError:
                 logging.debug(f"no message in {self.TIMEOUT} seconds")
                 print("timeout")
@@ -159,9 +157,7 @@ class ReconnectingWebsocket:
         res = None
         while not res:
             try:
-                res = await asyncio.wait_for(
-                    self._queue.get(), timeout=self.TIMEOUT
-                )
+                res = await asyncio.wait_for(self._queue.get(), timeout=self.TIMEOUT)
             except asyncio.TimeoutError:
                 logging.debug(f"no message in {self.TIMEOUT} seconds")
         return res
@@ -239,12 +235,10 @@ class FtxSocketManager:
 
     async def subscribe(self, conn_name: str, **params):
         try:
-            
+
             await self._conns[conn_name].send_msg(params)
         except KeyError:
-            self._log.warning(
-                f"Connection name: <{conn_name}> not create and start!"
-            )
+            self._log.warning(f"Connection name: <{conn_name}> not create and start!")
 
     async def _exit_socket(self, name: str):
         await self._stop_socket(name)
@@ -319,7 +313,7 @@ class ThreadedWebsocketManager(ThreadedApiManager):
     def login(self, conn_name: str):
         if not conn_name:
             return
-        #ts = str(int(time.time() * 1000))
+        # ts = str(int(time.time() * 1000))
         ts = int(time.time() * 1000)
         sign = ws_signature(ts, self.secret)
         args = {}
