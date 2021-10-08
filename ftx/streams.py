@@ -196,7 +196,6 @@ class ReconnectingWebsocket:
                 f"waiting {reconnect_wait}"
             )
             await asyncio.sleep(reconnect_wait)
-            print("sdf")
             await self.connect()
         else:
             logging.error(f"Max reconnections {self.MAX_RECONNECTS} reached:")
@@ -258,11 +257,13 @@ class ThreadedWebsocketManager(ThreadedApiManager):
         self,
         api_key: Optional[str] = None,
         api_secret: Optional[str] = None,
+        subaccount: str = None,
     ):
         super().__init__(api_key, api_secret)
         self._bsm: Optional[FtxSocketManager] = None
         self.api = api_key
         self.secret = api_secret
+        self.subaccount = subaccount
 
     async def _before_socket_listener_start(self):
         assert self._client
@@ -313,13 +314,15 @@ class ThreadedWebsocketManager(ThreadedApiManager):
     def login(self, conn_name: str):
         if not conn_name:
             return
-        # ts = str(int(time.time() * 1000))
         ts = int(time.time() * 1000)
         sign = ws_signature(ts, self.secret)
         args = {}
         args["key"] = self.api
         args["sign"] = sign
         args["time"] = ts
+        if self.subaccount != None:
+            args["subaccount"] = self.subaccount
+
         self.subscribe(conn_name=conn_name, args=args, op="login")
 
     def ping(self, name):

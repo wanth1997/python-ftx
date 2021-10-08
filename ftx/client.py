@@ -49,8 +49,9 @@ class BaseClient:
 
 
 class Client(BaseClient):
-    def __init__(self, api: Optional[str], secret: Optional[str]):
+    def __init__(self, api: Optional[str], secret: Optional[str], subaccount=None):
         super().__init__(api=api, secret=secret)
+        self.subaccount = subaccount
 
     def _init_session(self) -> requests.Session:
         self.header = self._get_header()
@@ -81,6 +82,8 @@ class Client(BaseClient):
             self.header["FTX-KEY"] = self.API_KEY
             self.header["FTX-SIGN"] = sig
             self.header["FTX-TS"] = ts
+            if self.subaccount != None:
+                self.header["FTX-SUBACCOUNT"] = self.subaccount
             self.session.headers.update(self.header)
             self.response = getattr(self.session, method)(uri, json=params)
             return self._handle_response(self.response)
@@ -94,8 +97,11 @@ class Client(BaseClient):
     def get_account_info(self) -> Dict:
         return self._get("/account")
 
-    def get_balances(self) -> Dict:
+    def get_all_balances(self) -> Dict:
         return self._get("/wallet/all_balances")
+
+    def get_balances(self) -> Dict:
+        return self._get("/wallet/balances")
 
     def send_order(self, **kwargs) -> Dict:
         try:
@@ -113,9 +119,11 @@ class AsyncClient(BaseClient):
         self,
         api: Optional[str],
         secret: Optional[str],
+        subaccount=None,
         loop=None,
     ):
         self.loop = loop or asyncio.get_event_loop()
+        self.subaccount = subaccount
         super().__init__(
             api=api,
             secret=secret,
@@ -149,6 +157,8 @@ class AsyncClient(BaseClient):
             self.header["FTX-KEY"] = self.API_KEY
             self.header["FTX-SIGN"] = sig
             self.header["FTX-TS"] = ts
+            if self.subaccount != None:
+                self.header["FTX-SUBACCOUNT"] = self.subaccount
             self.session.headers.update(self.header)
 
             async with getattr(self.session, method)(uri, params=params) as response:
