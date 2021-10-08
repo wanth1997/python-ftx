@@ -4,4 +4,4 @@ test:
 	tox
 
 lint:
-	black -l 79 *.py */*.py
+	black -l 120 *.py */*.py
