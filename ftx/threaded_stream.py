@@ -44,7 +44,6 @@ class ThreadedApiManager(threading.Thread):
                 if not msg:
                     continue
                 if "type" in msg and msg["type"] == "pong":
-                    #print("ping")
                     ping(name)
                     continue
                 callback(msg)
