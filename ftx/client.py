@@ -103,6 +103,9 @@ class Client(BaseClient):
     def get_balances(self) -> Dict:
         return self._get("/wallet/balances")
 
+    def get_positions(self) -> Dict:
+        return self._get("/positions")
+
     def send_order(self, **kwargs) -> Dict:
         try:
             return self._post("/orders", params=kwargs)
