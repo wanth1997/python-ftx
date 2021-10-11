@@ -49,6 +49,13 @@ wsm.subscribe(
     op="subscribe",
 )
 ```
+
+### Subaccount
+```
+clinet = Client(API, SECRET, "Subaacount_name")
+wsm = ThreadedWebsocketManager(API, SECRET, "Subaccount_name")
+```
+
 # Developer Zone
 
 ## Lint
