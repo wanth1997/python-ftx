@@ -82,7 +82,7 @@ class Client(BaseClient):
             self.header["FTX-KEY"] = self.API_KEY
             self.header["FTX-SIGN"] = sig
             self.header["FTX-TS"] = ts
-            if self.subaccount != None:
+            if self.subaccount is not None:
                 self.header["FTX-SUBACCOUNT"] = self.subaccount
             self.session.headers.update(self.header)
             self.response = getattr(self.session, method)(uri, json=params)
@@ -115,6 +115,9 @@ class Client(BaseClient):
 
     def set_leverage(self, **kwargs):
         return self._post("/account/leverage", kwargs)
+
+    def request_withdrawal(self, **kwargs):
+        return self._post("/wallet/withdrawals", kwargs)
 
 
 class AsyncClient(BaseClient):
@@ -160,7 +163,7 @@ class AsyncClient(BaseClient):
             self.header["FTX-KEY"] = self.API_KEY
             self.header["FTX-SIGN"] = sig
             self.header["FTX-TS"] = ts
-            if self.subaccount != None:
+            if self.subaccount is not None:
                 self.header["FTX-SUBACCOUNT"] = self.subaccount
             self.session.headers.update(self.header)
 
