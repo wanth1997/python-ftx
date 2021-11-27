@@ -119,6 +119,9 @@ class Client(BaseClient):
     def request_withdrawal(self, **kwargs):
         return self._post("/wallet/withdrawals", kwargs)
 
+    def cancel_order(self, order_id):
+        return self._delete(f"/orders/{order_id}")
+
 
 class AsyncClient(BaseClient):
     def __init__(
