@@ -1,5 +1,7 @@
 # Package User Zone
 
+Give this package a star if you like it!
+
 ## Installation
 
 ```bash
