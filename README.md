@@ -44,7 +44,7 @@ wsm.subscribe(name, channel="ticker", op="subscribe", market="BTC/USDT")
 # Auth subscribe
 name = 'private_connection'
 wsm.start_socket(on_read, socket_name=name)
-wsm.login(conn_name=name)
+wsm.login(socket_name=name)
 wsm.subscribe(
     name,
     channel="fills",

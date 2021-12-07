@@ -232,12 +232,12 @@ class FtxSocketManager:
 
         return self._conns[conn_id]
 
-    async def subscribe(self, conn_name: str, **params):
+    async def subscribe(self, socket_name: str, **params):
         try:
 
-            await self._conns[conn_name].send_msg(params)
+            await self._conns[socket_name].send_msg(params)
         except KeyError:
-            self._log.warning(f"Connection name: <{conn_name}> not create and start!")
+            self._log.warning(f"Connection name: <{socket_name}> not create and start!")
 
     async def _exit_socket(self, name: str):
         await self._stop_socket(name)
@@ -299,7 +299,7 @@ class ThreadedWebsocketManager(ThreadedApiManager):
         self.ping(socket_name)
         return socket
 
-    def subscribe(self, conn_name: str, **params):
+    def subscribe(self, socket_name: str, **params):
         while not self._bsm:
             time.sleep(0.1)
         try:
@@ -307,12 +307,12 @@ class ThreadedWebsocketManager(ThreadedApiManager):
         except RuntimeError:
             loop = None
         if loop and loop.is_running():
-            loop.create_task(self._bsm.subscribe(conn_name, **params))
+            loop.create_task(self._bsm.subscribe(socket_name, **params))
         else:
-            asyncio.run(self._bsm.subscribe(conn_name, **params))
+            asyncio.run(self._bsm.subscribe(socket_name, **params))
 
-    def login(self, conn_name: str):
-        if not conn_name:
+    def login(self, socket_name: str):
+        if not socket_name:
             return
         ts = int(time.time() * 1000)
         sign = ws_signature(ts, self.secret)
@@ -323,7 +323,7 @@ class ThreadedWebsocketManager(ThreadedApiManager):
         if self.subaccount != None:
             args["subaccount"] = self.subaccount
 
-        self.subscribe(conn_name=conn_name, args=args, op="login")
+        self.subscribe(socket_name=socket_name, args=args, op="login")
 
     def ping(self, name):
         self.subscribe(name, op="ping")
