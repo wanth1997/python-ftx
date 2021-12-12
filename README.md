@@ -10,6 +10,8 @@ pip install python-ftx
 
 ## Sample Code
 ### Restful Api
+
+> API and SECRET should be assgin with your api key and secret key.
 ```python
 from ftx import Client
 import os
@@ -23,6 +25,8 @@ print(info)
 
 ```
 ### Websocket
+
+> API and SECRET should be assgin with your api key and secret key.
 
 ```python
 from ftx import ThreadedWebsocketManager
@@ -52,7 +56,7 @@ wsm.subscribe(
 )
 ```
 
-### Subaccount
+### Subaccount create
 ```
 clinet = Client(API, SECRET, "Subaacount_name")
 wsm = ThreadedWebsocketManager(API, SECRET, "Subaccount_name")
