@@ -75,17 +75,14 @@ class Client(BaseClient):
         try:
             ts = str(int(time.time() * 1000))
             uri = f"{self.API_URL}{path}"
-            if method == "post":
-                sig = signature(ts, method, path, self.API_SECRET, params)
-            else:
-                sig = signature(ts, method, path, self.API_SECRET)
+            sig = signature(ts, method, path, self.API_SECRET, params)
             self.header["FTX-KEY"] = self.API_KEY
             self.header["FTX-SIGN"] = sig
             self.header["FTX-TS"] = ts
             if self.subaccount is not None:
                 self.header["FTX-SUBACCOUNT"] = self.subaccount
             self.session.headers.update(self.header)
-            self.response = getattr(self.session, method)(uri, json=params)
+            self.response = getattr(self.session, method)(uri, params=params)
             return self._handle_response(self.response)
         except Exception as e:
             print(f"[ERROR] Request failed!")
@@ -93,6 +90,9 @@ class Client(BaseClient):
 
     def get_markets(self) -> Dict:
         return self._get("/markets")
+
+    def get_funding_rate(self, **kwargs) -> Dict:
+        return self._get("/funding_rates", params=kwargs)
 
     def get_account_info(self) -> Dict:
         return self._get("/account")

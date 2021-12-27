@@ -4,7 +4,7 @@ import json
 
 def signature(ts: str, method: str, path_url: str, secret: str, post_body=None):
     signature_payload = f"{ts}{method.upper()}/api{path_url}".encode()
-    if method == "post":
+    if post_body is not None:
         signature_payload += json.dumps(post_body).encode()
     signature = hmac.new(secret.encode(), signature_payload, "sha256").hexdigest()
     return signature
