@@ -82,7 +82,10 @@ class Client(BaseClient):
             if self.subaccount is not None:
                 self.header["FTX-SUBACCOUNT"] = self.subaccount
             self.session.headers.update(self.header)
-            self.response = getattr(self.session, method)(uri, params=params)
+            if method == "get":
+                self.response = getattr(self.session, method)(uri, params=params)
+            else:
+                self.response = getattr(self.session, method)(uri, json=params)
             return self._handle_response(self.response)
         except Exception as e:
             print(f"[ERROR] Request failed!")
