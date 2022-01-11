@@ -4,7 +4,7 @@ import sys
 
 setup(
     name="python-ftx",
-    version="0.0.6",
+    version="0.0.8",
     author="tinghsuwan",
     author_email="wanth1997@gmail.com",
     description="FTX python API SDK",
