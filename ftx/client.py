@@ -97,7 +97,7 @@ class Client(BaseClient):
     def get_funding_rate(self, **kwargs) -> Dict:
         return self._get("/funding_rates", params=kwargs)
 
-    def get_futures_klines(self, market: str, resolution: int, start_time=None, end_time=None) -> Dict:
+    def get_klines(self, market: str, resolution: int, start_time=None, end_time=None) -> Dict:
         params = {}
         params["resolution"] = resolution
         if start_time is not None:
@@ -105,7 +105,7 @@ class Client(BaseClient):
         if end_time is not None:
             params["end_time"] = end_time
 
-        return self._get(f"/indexes/{market}/candles", params=params)
+        return self._get(f"/markets/{market}/candles", params=params)
 
     def get_account_info(self) -> Dict:
         return self._get("/account")
