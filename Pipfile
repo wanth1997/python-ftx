@@ -10,6 +10,7 @@ websockets = "==9.0"
 black = "*"
 requests = "*"
 twine = "*"
+loguru = "*"
 
 [dev-packages]
 

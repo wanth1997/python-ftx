@@ -3,6 +3,7 @@ import json
 import aiohttp
 import asyncio
 import requests
+from loguru import logger
 from ftx import signature
 from urllib.parse import urlencode
 from typing import Dict, Optional, List, Tuple
@@ -88,8 +89,8 @@ class Client(BaseClient):
                 self.response = getattr(self.session, method)(uri, json=params)
             return self._handle_response(self.response)
         except Exception as e:
-            print(f"[ERROR] Request failed!")
-            print(self.response.text)
+            logger.error(f"[ERROR] Request failed!")
+            logger.error(self.response.text)
 
     def get_markets(self) -> Dict:
         return self._get("/markets")
@@ -188,8 +189,8 @@ class AsyncClient(BaseClient):
                 return await self._handle_response(response)
 
         except Exception as e:
-            print(f"[ERROR] Request failed!")
-            print(e)
+            logger.error(f"[ERROR] Request failed!")
+            logger.error(e)
 
     async def _handle_response(self, response: requests.Response):
         code = response.status_code
