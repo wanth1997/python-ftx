@@ -17,3 +17,7 @@ class FtxValueError:
 
     def __str__(self):
         return f"Invalid Response: {self.response.text}"
+
+
+class FtxWebsocketUnableToConnect(Exception):
+    pass
