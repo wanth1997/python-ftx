@@ -76,7 +76,11 @@ class Client(BaseClient):
         try:
             ts = str(int(time.time() * 1000))
             uri = f"{self.API_URL}{path}"
-            sig = signature(ts, method, path, self.API_SECRET, params)
+            if method == "POST":
+                sig = signature(ts, method, path, self.API_SECRET, params)
+            else:
+                sig = signature(ts, method, path, self.API_SECRET)
+
             self.header["FTX-KEY"] = self.API_KEY
             self.header["FTX-SIGN"] = sig
             self.header["FTX-TS"] = ts
@@ -118,7 +122,10 @@ class Client(BaseClient):
         return self._get("/wallet/balances")
 
     def get_positions(self, **kwargs) -> Dict:
-        return self._get("/positions", params=kwargs)
+        if kwargs:
+            return self._get("/positions", params=kwargs)
+        else:
+            return self._get("/positions")
 
     def send_order(self, **kwargs) -> Dict:
         try:
