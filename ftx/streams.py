@@ -6,7 +6,7 @@ from asyncio import sleep
 import time
 from enum import Enum
 from random import random
-from typing import Optional, List, Dict, Callable, Any
+from typing import Optional, List, Callable
 
 from socket import gaierror
 from .exceptions import FtxWebsocketUnableToConnect
@@ -95,8 +95,13 @@ class ReconnectingWebsocket:
             await sleep(0.1)
 
     async def send_msg(self, msg):
+        wait_count = 0
         while not self.ws:
             time.sleep(0.1)
+            wait_count = wait_count + 1
+            if wait_count > 20:
+                raise Exception("send_msg() failed, cannot resend subscription")
+
         await self.ws.send(json.dumps(msg))
 
     async def _before_connect(self):
@@ -174,7 +179,7 @@ class ReconnectingWebsocket:
             reconnect_wait = self._get_reconnect_wait(self._reconnects)
             logger.debug(
                 f"websocket reconnecting. {self.MAX_RECONNECTS - self._reconnects} reconnects left - "
-                f"waiting {reconnect_wait}"
+                f"waiting {reconnect_wait} seconds to start."
             )
             await asyncio.sleep(reconnect_wait)
             await self.connect()
