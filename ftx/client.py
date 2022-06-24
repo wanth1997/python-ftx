@@ -76,10 +76,7 @@ class Client(BaseClient):
         try:
             ts = str(int(time.time() * 1000))
             uri = f"{self.API_URL}{path}"
-            if method == "POST":
-                sig = signature(ts, method, path, self.API_SECRET, params)
-            else:
-                sig = signature(ts, method, path, self.API_SECRET)
+            sig = signature(ts, method, path, self.API_SECRET, params)
 
             self.header["FTX-KEY"] = self.API_KEY
             self.header["FTX-SIGN"] = sig
